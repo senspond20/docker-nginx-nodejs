@@ -6,8 +6,7 @@
 ref : https://ko.wikipedia.org/wiki/%ED%94%84%EB%A1%9D%EC%8B%9C_%EC%84%9C%EB%B2%84
 
 
-+ 프로젝트 구성
-  
++ flow
 ```mermaid
 graph TD;
     c(Client:사용자) --> P(Nginx : Reverse-Proxy - 방화벽 설치)
@@ -17,7 +16,9 @@ graph TD;
 ```
 ****
 + **docker 에서 방화벽 관련한 이슈가 있다.**
-
++ docker로 컨테이너를 띄우고나서 Ubuntu의 ufw를 사용하여 방화벽을 걸었을 경우 아래의 옵션이 추가되지 않으면 ufw에서 세팅한 방화벽 정책이 활성화되지 않는다.
++ ref : https://wiki.arone.co.kr/pages/viewpage.action?pageId=8421495
+  
 ```js
 const http = require('http');
 
@@ -43,32 +44,15 @@ new Server(5002, `hello nodejs server 2`).on();
 new Server(5003, `hello nodejs server 3`).on();
 ```
 
-+ docker-compose.yml
-  
-```yml
-version: "3.7"
-services:
-   nodeapp:
-     build : .
-     container_name: nodejs_testapp
-   nginx:
-     image: nginx:alpine
-     container_name: nginx_test
-     restart: unless-stopped
-     ports:
-       - "80:80"
-     volumes:
-       - ./vol/nginx/nginx.conf:/etc/nginx/nginx.conf # nginx 설정 파일 volume 맵핑
-```
 + Dockerfile
-```
+```yml
 FROM node:8
 COPY . .
 RUN npm install
 EXPOSE 5001 5002 5003
 WORKDIR /
  
-CMD npm start;
+CMD node app.js;
 ```
 
 + nginx.conf
@@ -109,8 +93,32 @@ http {
     sendfile        on;                                                                         
     keepalive_timeout  65;                                                                      
     include /etc/nginx/conf.d/*.conf;     
-
 }
+```
+
+
++ docker-compose.yml
+  
+```yml
+version: "3.7"
+services:
+   nodeapp:
+     build : .
+     container_name: nodejs_testapp
+   nginx:
+     image: nginx:alpine
+     container_name: nginx_test
+     restart: unless-stopped
+     ports:
+       - "80:80"
+     volumes:
+       - ./vol/nginx/nginx.conf:/etc/nginx/nginx.conf # nginx 설정 파일 volume 맵핑
+```
+
++ run 
+
+```git
+docker-compose up -d
 ```
 
 ## Proxy Server 
